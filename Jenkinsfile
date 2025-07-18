@@ -50,14 +50,6 @@ spec:
       command: ['cat']
       tty: true
 """
-  stages {
-    stage('Init') {
-      steps {
-        container('docker') {
-          sh 'docker info'
-        }
-      }
-    }
   }
 }
 
@@ -74,6 +66,15 @@ spec:
   }
 
   stages {
+    
+    stage('Init') {
+      steps {
+        container('docker') {
+          sh 'docker info'
+        }
+      }
+    }
+
     stage('Check Environment') {
       when {
         expression { !skipRemainingStages }
