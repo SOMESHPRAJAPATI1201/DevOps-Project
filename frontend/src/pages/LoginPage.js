@@ -22,7 +22,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://backend:8080/student/auth/login', formData);
+      const response = await axios.post('http://localhost:8081/student/auth/login', formData);
       const token = response;
       console.log('Login successful:', token);
     //   localStorage.setItem('token', token); // Store token

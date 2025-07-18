@@ -121,38 +121,3 @@ spec:
     }
   }
 }
-
-    // stage('Push to Fargate ECS') {
-                    // jfrog rt docker-push view-repo-docker/\${DOCKER_TAG}/latest --quiet
-
-                // jfrog rt cp view-repo-docker/\${DOCKER_TAG}/old_version_1 view-repo-docker/\${DOCKER_TAG}/latest
-
-    //   when {
-    //     expression { !skipRemainingStages }
-    //   }
-    //   steps {
-    //     container('awscli') {
-    //       sh '''
-    //         echo "Assuming AWS role"
-    //         role_arn=arn:aws:iam::${ACCOUNT}:role/delegatedadmin/adodeveloper/service-role/cet-${TAG}-us-east-1-jenkins
-    //         aws sts assume-role --role-arn $role_arn --role-session-name new-deployment > /tmp/role-creds.txt
-    //         cat /tmp/role-creds.txt
-
-    //         export AWS_ACCESS_KEY_ID=$(jq -r .Credentials.AccessKeyId /tmp/role-creds.txt)
-    //         export AWS_SECRET_ACCESS_KEY=$(jq -r .Credentials.SecretAccessKey /tmp/role-creds.txt)
-    //         export AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken /tmp/role-creds.txt)
-
-    //         mkdir -p ~/.aws
-    //         echo "[default]" > ~/.aws/credentials
-    //         echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
-    //         echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
-    //         echo "aws_session_token=$AWS_SESSION_TOKEN" >> ~/.aws/credentials
-
-    //         aws ecs update-service --cluster cetapp-${TAG} --service reactnodeapp-${TAG} --force-new-deployment
-    //         aws ecs update-service --cluster cetapp-${TAG} --service reactnodeapp-db-${TAG} --force-new-deployment
-    //       '''
-    //     }
-    //   }
-    // }
-//   }
-// }
