@@ -53,18 +53,9 @@ spec:
     }
 
     stage('JFrog Push') {
-      when {
-        expression { !skipRemainingStages }
-      }
       steps {
-        container('docker') {
-          withCredentials([
-            usernamePassword(
-              credentialsId: 'c760fc9e-928d-4328-b46a-ce3a07d1ec7e',
-              usernameVariable: 'USER',
-              passwordVariable: 'PASS'
-            )
-          ]) {
+        container('jfrog') {
+          withCredentials([usernamePassword(credentialsId: 'c760fc9e-928d-4328-b46a-ce3a07d1ec7e', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
             sh """
               jfrog config add artifactory \
                 --url=https://trialiof91c.jfrog.io \
@@ -75,7 +66,6 @@ spec:
 
               jfrog docker login
             """
-          }
         }
       }
     }
