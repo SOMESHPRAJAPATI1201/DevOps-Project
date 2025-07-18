@@ -11,16 +11,33 @@ metadata:
 spec:
   serviceAccountName: jenkins
   restartPolicy: Never
+  volumes:
+    - name: docker-graph-storage
+      emptyDir: {}
+  initContainers:
+    - name: docker-daemon
+      image: docker:20.10.24-dind
+      securityContext:
+        privileged: true
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        - name: DOCKER_DRIVER
+          value: overlay2
+      volumeMounts:
+        - name: docker-graph-storage
+          mountPath: /var/lib/docker
   containers:
     - name: docker
-      image: docker:20.10.15
-      command:
-        - sleep
-      args:
-        - 99d
+      image: docker:20.10.24
+      command: ['sleep']
+      args: ['99d']
       env:
         - name: DOCKER_HOST
-          value: tcp://localhost:2374
+          value: tcp://localhost:2375
+      volumeMounts:
+        - name: docker-graph-storage
+          mountPath: /var/lib/docker
     - name: jfrogcli
       image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2:2.15.1
       command: ['cat']
@@ -32,19 +49,7 @@ spec:
     - name: awscli
       image: amazon/aws-cli:2.15.21
       command: ['cat']
-  initContainers:
-    - name: docker-daemon
-      image: docker:19.03.1-dind
-      resources:
-        memory: "4Gi"
-        cpu: "2"
-      securityContext:
-        privileged: true
-      env:
-        - name: DOCKER_TLS_CERTDIR
-          value: ""
-        - name: DOCKER_DRIVER
-          value: overlay2
+      tty: true
 """
     }
   }
