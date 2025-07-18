@@ -9,7 +9,7 @@ metadata:
   labels:
     some-label: test-app
 spec:
-  serviceAccountName: jenkins-role
+  serviceAccountName: jenkins
   restartPolicy: Never
   containers:
     - name: docker
