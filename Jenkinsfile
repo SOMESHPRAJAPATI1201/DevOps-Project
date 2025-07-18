@@ -120,9 +120,6 @@ spec:
 
                 jfrog docker login
 
-                jfrog rt docker-push view-repo-docker/\${DOCKER_TAG}/latest --quiet
-
-                jfrog rt cp view-repo-docker/\${DOCKER_TAG}/old_version_1 view-repo-docker/\${DOCKER_TAG}/latest
               """
             }
           }
@@ -131,6 +128,10 @@ spec:
     }
 
     // stage('Push to Fargate ECS') {
+                    // jfrog rt docker-push view-repo-docker/\${DOCKER_TAG}/latest --quiet
+
+                // jfrog rt cp view-repo-docker/\${DOCKER_TAG}/old_version_1 view-repo-docker/\${DOCKER_TAG}/latest
+
     //   when {
     //     expression { !skipRemainingStages }
     //   }
