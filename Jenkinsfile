@@ -1,7 +1,6 @@
 pipeline {
   agent {
     kubernetes {
-      label 'Test-App'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -38,6 +37,10 @@ spec:
       volumeMounts:
         - name: docker-graph-storage
           mountPath: /var/lib/docker
+    - name: awscli
+      image: amazon/aws-cli:2.15.21
+      command: ['cat']
+      tty: true
     - name: jfrogcli
       image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2:2.15.1
       command: ['cat']
@@ -46,13 +49,17 @@ spec:
       image: sonarsource/sonar-scanner-cli
       command: ['cat']
       tty: true
-    - name: awscli
-      image: amazon/aws-cli:2.15.21
-      command: ['cat']
-      tty: true
 """
+  stages {
+    stage('Init') {
+      steps {
+        container('docker') {
+          sh 'docker info'
+        }
+      }
     }
   }
+}
 
   environment {
     ENV_PROD = "origin/master"
