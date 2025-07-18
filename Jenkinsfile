@@ -1,5 +1,4 @@
 pipeline {
-  
   agent {
     kubernetes {
       label 'Test-App'
@@ -46,11 +45,118 @@ spec:
           value: ""
         - name: DOCKER_DRIVER
           value: overlay2
-        - name: AWS_WEB_IDENTITY_TOKEN_FILE
-          value: "/var/run/secrets/eks.amazonaws.com/serviceaccount/token"
-        - name: AWS_ROLE_ARN
-          value: arn:aws:iam:::role/ddf-cion-tool
 """
     }
   }
-}
+
+  environment {
+    ENV_PROD = "origin/master"
+    // ENV_DEV = "origin/develop"
+
+
+    PROD_ENVIRONMENT  = "prod"
+    // TEST_ENVIRONMENT = "test"
+
+    PROD_ACCOUNT = "084828603324"
+    // TEST_ACCOUNT  = "084828603324"
+  }
+
+  stages {
+    stage('Check Branch') {
+      steps {
+        script {
+          // if ("${env.GIT_BRANCH}" == "${env.ENV_PROD}" || "${env.GIT_BRANCH}" == "${env.ENV_DEV}") {
+            echo "Deploying this branch"
+
+            if ("${env.GIT_BRANCH}" == "${env.ENV_PROD}") {
+              ENVIRONMENT = "${env.PROD_ENVIRONMENT}"
+              ACCOUNT = "${env.PROD_ACCOUNT}"
+              TAG = "prod"
+              DOCKER_TAG = "test-app-prod"
+              // APP_DB_URL = "${env.PROD_APP_DB_URL}"
+            }
+            // } else if ("${env.GIT_BRANCH}" == "${env.ENV_IMP}") {
+            //   ENVIRONMENT = "${env.IMP_ENVIRONMENT}"
+            //   ACCOUNT = "${env.IMP_ACCOUNT}"
+            //   TAG = "imp"
+            //   DOCKER_TAG = "test-app-imp"
+            //   // APP_DB_URL = "${env.IMP_APP_DB_URL}"
+            // } else if ("${env.GIT_BRANCH}" == "${env.ENV_DEV}") {
+            //   ENVIRONMENT = "${env.DEV_ENVIRONMENT}"
+            //   ACCOUNT = "${env.DEV_ACCOUNT}"
+            //   TAG = "dev"
+            //   DOCKER_TAG = "tes-app-dev"
+            //   // APP_DB_URL = "${env.DEV_APP_DB_URL}"
+            // } else if ("${env.GIT_BRANCH}" == "${env.ENV_TEST}") {
+            //   ENVIRONMENT = "${env.TEST_ENVIRONMENT}"
+            //   ACCOUNT = "${env.TEST_ACCOUNT}"
+            //   TAG = "test"
+            //   DOCKER_TAG = "test-app-test"
+            //   // APP_DB_URL = "${env.TEST_APP_DB_URL}"
+            // }
+
+            skipRemainingStages = false
+          } else {
+            echo "Not a branch that we want to deploy!"
+            skipRemainingStages = true
+          }
+        }
+      }
+    }
+
+    stage('JFrog Push') {
+                when {
+                  expression { !skipRemainingStages }
+                }
+                container('jfrogcli') {
+            withCredentials([usernamePassword(credentialsId: 'c760fc9e-928d-4328-b46a-ce3a07d1ec7e', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+              sh """
+                jfrog config add artifactory \
+                  --url=https://trialiof91c.jfrog.io/artifactory \
+                  --user \$USER \
+                  --password \$PASS \
+                  --interactive=false \
+                  --basic-auth-only=true
+
+                jfrog docker login
+
+                jfrog rt docker-push view-repo-docker/\${DOCKER_TAG}/latest --quiet
+
+                jfrog rt cp view-repo-docker/\${DOCKER_TAG}/old_version_1 view-repo-docker/\${DOCKER_TAG}/latest
+              """
+            }
+          }
+        }
+      }
+    }
+
+    // stage('Push to Fargate ECS') {
+    //   when {
+    //     expression { !skipRemainingStages }
+    //   }
+    //   steps {
+    //     container('awscli') {
+    //       sh '''
+    //         echo "Assuming AWS role"
+    //         role_arn=arn:aws:iam::${ACCOUNT}:role/delegatedadmin/adodeveloper/service-role/cet-${TAG}-us-east-1-jenkins
+    //         aws sts assume-role --role-arn $role_arn --role-session-name new-deployment > /tmp/role-creds.txt
+    //         cat /tmp/role-creds.txt
+
+    //         export AWS_ACCESS_KEY_ID=$(jq -r .Credentials.AccessKeyId /tmp/role-creds.txt)
+    //         export AWS_SECRET_ACCESS_KEY=$(jq -r .Credentials.SecretAccessKey /tmp/role-creds.txt)
+    //         export AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken /tmp/role-creds.txt)
+
+    //         mkdir -p ~/.aws
+    //         echo "[default]" > ~/.aws/credentials
+    //         echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
+    //         echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+    //         echo "aws_session_token=$AWS_SESSION_TOKEN" >> ~/.aws/credentials
+
+    //         aws ecs update-service --cluster cetapp-${TAG} --service reactnodeapp-${TAG} --force-new-deployment
+    //         aws ecs update-service --cluster cetapp-${TAG} --service reactnodeapp-db-${TAG} --force-new-deployment
+    //       '''
+    //     }
+    //   }
+    // }
+//   }
+// }
