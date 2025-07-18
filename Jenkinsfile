@@ -54,18 +54,19 @@ spec:
 
     stage('JFrog Push') {
       steps {
-        container('jfrog') {
+        container('jfrogcli') {
           withCredentials([usernamePassword(credentialsId: 'c760fc9e-928d-4328-b46a-ce3a07d1ec7e', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
             sh """
-              jfrog config add artifactory \
-                --url=https://trialiof91c.jfrog.io \
-                --user \$USER \
-                --password \$PASS \
-                --interactive=false \
+              jfrog config add artifactory \\
+                --url=https://trialiof91c.jfrog.io \\
+                --user \$USER \\
+                --password \$PASS \\
+                --interactive=false \\
                 --basic-auth-only=true
 
               jfrog docker login
             """
+          }
         }
       }
     }
