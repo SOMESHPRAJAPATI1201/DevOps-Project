@@ -68,13 +68,12 @@ spec:
           // if ("${env.GIT_BRANCH}" == "${env.ENV_PROD}" || "${env.GIT_BRANCH}" == "${env.ENV_DEV}") {
             echo "Deploying this branch"
 
-            if ("${env.GIT_BRANCH}" == "${env.ENV_PROD}") {
+            // if ("${env.GIT_BRANCH}" == "${env.ENV_PROD}") {
               ENVIRONMENT = "${env.PROD_ENVIRONMENT}"
               ACCOUNT = "${env.PROD_ACCOUNT}"
               TAG = "prod"
               DOCKER_TAG = "test-app-prod"
               // APP_DB_URL = "${env.PROD_APP_DB_URL}"
-            }
             // } else if ("${env.GIT_BRANCH}" == "${env.ENV_IMP}") {
             //   ENVIRONMENT = "${env.IMP_ENVIRONMENT}"
             //   ACCOUNT = "${env.IMP_ACCOUNT}"
@@ -96,10 +95,10 @@ spec:
             // }
 
             skipRemainingStages = false
-          } else {
-            echo "Not a branch that we want to deploy!"
-            skipRemainingStages = true
-          }
+          // } else {
+          //   echo "Not a branch that we want to deploy!"
+          //   skipRemainingStages = true
+          // }
         }
       }
     }
